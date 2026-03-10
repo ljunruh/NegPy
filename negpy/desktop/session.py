@@ -4,6 +4,7 @@ from typing import Dict, Any, List, Optional
 from PyQt6.QtCore import QObject, pyqtSignal, QAbstractListModel, QModelIndex, Qt
 from negpy.domain.models import WorkspaceConfig
 from negpy.infrastructure.storage.repository import StorageRepository
+from negpy.kernel.system.config import APP_CONFIG
 
 
 class ToolMode(Enum):
@@ -42,6 +43,10 @@ class AppState:
 
     # Hardware Acceleration
     gpu_enabled: bool = True
+
+    # History tracking
+    undo_index: int = 0
+    max_history_index: int = 0
 
 
 class AssetListModel(QAbstractListModel):
@@ -83,6 +88,7 @@ class DesktopSessionManager(QObject):
     """
 
     state_changed = pyqtSignal()
+    history_changed = pyqtSignal()  # Emitted when undo/redo/persist happens
     settings_saved = pyqtSignal()
     file_selected = pyqtSignal(str)  # Emits file path when active file changes
 
@@ -274,6 +280,10 @@ class DesktopSessionManager(QObject):
             self.state.current_file_path = file_info["path"]
             self.state.current_file_hash = file_info["hash"]
 
+            # Restore history state for file
+            self.state.undo_index = self.repo.get_max_history_index(file_info["hash"])
+            self.state.max_history_index = self.state.undo_index
+
             saved_config = self.repo.load_file_settings(file_info["hash"])
 
             if saved_config:
@@ -348,6 +358,16 @@ class DesktopSessionManager(QObject):
         """
         Updates global config and optionally saves to disk.
         """
+        if persist and self.state.current_file_hash:
+            self.repo.save_history_step(self.state.current_file_hash, self.state.undo_index, self.state.config)
+            self.state.undo_index += 1
+            self.state.max_history_index = self.state.undo_index
+
+            if self.state.undo_index > APP_CONFIG.max_history_steps:
+                self.repo.prune_history(self.state.current_file_hash, max_steps=APP_CONFIG.max_history_steps)
+
+            self.history_changed.emit()
+
         self.state.config = config
 
         if persist:
@@ -359,11 +379,39 @@ class DesktopSessionManager(QObject):
         if render:
             self.state_changed.emit()
 
+    def undo(self) -> None:
+        if self.state.undo_index > 0 and self.state.current_file_hash:
+            if self.state.undo_index == self.state.max_history_index:
+                self.repo.save_history_step(self.state.current_file_hash, self.state.undo_index, self.state.config)
+
+            self.state.undo_index -= 1
+            prev_config = self.repo.load_history_step(self.state.current_file_hash, self.state.undo_index)
+            if prev_config:
+                self.state.config = prev_config
+                self.state_changed.emit()
+                self.history_changed.emit()
+
+    def redo(self) -> None:
+        if self.state.undo_index < self.state.max_history_index and self.state.current_file_hash:
+            self.state.undo_index += 1
+            next_config = self.repo.load_history_step(self.state.current_file_hash, self.state.undo_index)
+            if next_config:
+                self.state.config = next_config
+                self.state_changed.emit()
+                self.history_changed.emit()
+
     def reset_settings(self) -> None:
         """
-        Reverts current file to default configuration.
+        Reverts current file to default configuration and clears history.
         """
+        if self.state.current_file_hash:
+            self.repo.clear_history(self.state.current_file_hash)
+            self.state.undo_index = 0
+            self.state.max_history_index = 0
+            self.history_changed.emit()
+
         self.update_config(WorkspaceConfig())
+        self.state_changed.emit()
 
     def copy_settings(self) -> None:
         import copy

@@ -8,7 +8,7 @@ It is built with **Python**, running natively on Linux, macOS, and Windows.
 
 ---
 
-![alt text](docs/media/0915.png)
+![alt text](docs/media/0100.png)
 
 ---
 
@@ -29,6 +29,7 @@ It is built with **Python**, running natively on Linux, macOS, and Windows.
 *   **Non-destructive**: original files are never touched; edits are stored as recipes.
 *   **Keyboard Shortcuts**: [see here](docs/KEYBOARD.md)
 *   **Database**: All edits live in a local SQLite database, keyed by file hash. You can move or rename files without losing your work.
+*   **Persistent Undo/Redo**: Up to 100 edits saved in local db. Persistent across sessions.
 *   **Print Ready**: Export module designed for printing, featuring border controls, ICC soft-proofing, and [dynamic filename templating](docs/TEMPLATING.md).
 
 ---
@@ -45,13 +46,9 @@ It is built with **Python**, running natively on Linux, macOS, and Windows.
 Grab the latest release for your OS from the **[Releases Page](https://github.com/marcinz606/NegPy/releases)**.
 
 #### **🐧 Linux**
-I provide an `.AppImage`. Make it executable using `chmod +x` and It should just work. But across all different distros you never know :)
+I provide an `.AppImage`. Make it executable using `chmod +x` and It should just work.
 
 You can also clone the repo and build it yourself, instruction here: [CONTRIBUTING.md](CONTRIBUTING.md)
-
-##### WARNING
-
-On some distros (mostly debian-based) you might need to install `libxcb-cursor0` (or your distros equvalent, just google it) and possibly some other requirements. If the app doesn't start, launch it from terminal and see the output and go from there.
 
 #### **🛡️ Unsigned Software Warning**
 Since this is a free hobby project, I don't pay Apple or Microsoft ransom for their developer certificates. You'll get a scary warning the first time you run it.

@@ -1,4 +1,4 @@
-from PyQt6.QtWidgets import QPushButton, QHBoxLayout
+from PyQt6.QtWidgets import QPushButton, QHBoxLayout, QLabel
 import qtawesome as qta
 from negpy.desktop.view.widgets.sliders import CompactSlider
 from negpy.desktop.view.sidebar.base import BaseSidebar
@@ -46,14 +46,19 @@ class RetouchSidebar(BaseSidebar):
         self.clear_btn = QPushButton(" Clear All")
         self.clear_btn.setIcon(qta.icon("fa5s.trash-alt", color=THEME.text_primary))
 
+        self.heals_count_lbl = QLabel("Heals: 0")
+        self.heals_count_lbl.setStyleSheet(f"color: {THEME.text_secondary}; font-weight: bold; padding-left: 5px;")
+
         actions_row.addWidget(self.undo_btn)
         actions_row.addWidget(self.clear_btn)
+        actions_row.addStretch()
+        actions_row.addWidget(self.heals_count_lbl)
         self.layout.addLayout(actions_row)
 
         self.layout.addStretch()
 
     def _connect_signals(self) -> None:
-        self.auto_dust_btn.toggled.connect(lambda c: self.update_config_section("retouch", dust_remove=c))
+        self.auto_dust_btn.toggled.connect(lambda c: self.update_config_section("retouch", persist=True, dust_remove=c))
         self.threshold_slider.valueChanged.connect(
             lambda v: self.update_config_section("retouch", readback_metrics=False, dust_threshold=v)
         )
@@ -80,7 +85,10 @@ class RetouchSidebar(BaseSidebar):
             self.manual_size_slider.setValue(float(conf.manual_dust_size))
             self.pick_dust_btn.setChecked(self.state.active_tool == ToolMode.DUST_PICK)
 
-            has_spots = len(conf.manual_dust_spots) > 0
+            num_spots = len(conf.manual_dust_spots)
+            self.heals_count_lbl.setText(f"Heals: {num_spots}")
+
+            has_spots = num_spots > 0
             self.undo_btn.setEnabled(has_spots)
             self.clear_btn.setEnabled(has_spots)
         finally:

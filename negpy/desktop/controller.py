@@ -53,6 +53,8 @@ class AppController(QObject):
     thumbnail_update_requested = pyqtSignal(ThumbnailUpdateTask)
     tool_sync_requested = pyqtSignal()
     config_updated = pyqtSignal()
+    zoom_requested = pyqtSignal(float)
+    zoom_changed = pyqtSignal(float)
     status_message_requested = pyqtSignal(str, int)
     status_progress_requested = pyqtSignal(int, int)
 
@@ -94,10 +96,20 @@ class AppController(QObject):
         self.discovery_worker.moveToThread(self.discovery_thread)
         self.discovery_thread.start()
 
+        self.canvas: Any = None
         self._is_rendering = False
         self._pending_render_task: Any = None
 
         self._connect_signals()
+
+    def register_canvas(self, canvas: Any) -> None:
+        """
+        Registers the canvas and connects its signals.
+        """
+        self.canvas = canvas
+        self.zoom_requested.connect(self.canvas.set_zoom)
+        self.canvas.zoom_changed.connect(self.zoom_changed.emit)
+        self.canvas.clicked.connect(self.handle_canvas_clicked)
 
     def set_status(self, message: str, timeout: int = 0) -> None:
         self.status_message_requested.emit(message, timeout)
@@ -129,7 +141,7 @@ class AppController(QObject):
 
         self.session.file_selected.connect(self.load_file)
         self.session.state_changed.connect(self.config_updated.emit)
-        self.session.state_changed.connect(self.request_render)
+        self.session.state_changed.connect(lambda: self.request_render())
 
     def generate_missing_thumbnails(self) -> None:
         missing = [f for f in self.state.uploaded_files if f["name"] not in self.state.thumbnails]
@@ -179,6 +191,7 @@ class AppController(QObject):
         """
         Loads a new RAW file into the linear preview workspace.
         """
+        self.zoom_requested.emit(1.0)
         self.set_status(f"Loading {os.path.basename(file_path)}...")
         self.loading_started.emit()
         self._first_render_done = False

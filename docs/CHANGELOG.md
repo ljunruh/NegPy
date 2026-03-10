@@ -1,5 +1,23 @@
 # Change Log
 
+## 0.10.0
+
+- Added **Zoom & Pan** for preview:
+    - Mouse wheel to zoom (up to 400%).
+    - left-click (or middle click when using tools like spot healing brush) drag to pan.
+    - Discrete zoom slider in the toolbar.
+- Added **Persistent Undo/Redo**:
+    - Standard shortcuts (Ctrl+Z / Ctrl+Y).
+    - Stores up to 100 steps per file in local SQLite database.
+    - History survives app restarts and file switching.
+    - Track number of edits on image overlay (lower left corner)
+      - Also track number of heal spots in retouch toolbar section.
+- Packaged some additional requirements in Linux appimage for easier running on debian-derived distros.
+- **Fixed(?) UI rendering issues on Windows**
+
+NOTE: due to some backend changes in storing the edits you might get weird colors on your previously edited photos. Reset should get rid of that. Nuclear option is deleting `edits.db` and `settings.db` from NegPy folder in your Documents.
+
+
 ## 0.9.16
 
 - Stability improvements when using Numba-compiled functions.
@@ -119,4 +137,3 @@
 ## 0.9.1
 
 - Explicit support for more raw extensions for file picker.
-
