@@ -3,6 +3,7 @@
 ## 0.10.0
 
 - Added **Zoom & Pan** for preview:
+    - Useful for cleaning dust :)
     - Mouse wheel to zoom (up to 400%).
     - left-click (or middle click when using tools like spot healing brush) drag to pan.
     - Discrete zoom slider in the toolbar.
