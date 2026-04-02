@@ -99,7 +99,7 @@ class ActionToolbar(QWidget):
 
         # 5. Zoom
         self.zoom_slider = QSlider(Qt.Orientation.Horizontal)
-        self.zoom_slider.setRange(100, 400)
+        self.zoom_slider.setRange(25, 400)
         self.zoom_slider.setValue(100)
         self.zoom_slider.setFixedWidth(80)
         self.zoom_label = QLabel("100%")

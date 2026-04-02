@@ -1,5 +1,10 @@
 # Change Log
 
+## 0.12.0
+
+- Added functionality to reset slider on double click (slider iteself, not only label).
+- Added ability to "unzoom" for easier cropping.
+
 ## 0.11.0
 
 - Improved normalization/autoexposure.

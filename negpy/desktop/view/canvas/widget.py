@@ -65,8 +65,8 @@ class ImageCanvas(QWidget):
 
     def set_zoom(self, zoom: float) -> None:
         """Sets zoom level directly (from toolbar)."""
-        self.zoom_level = max(1.0, min(zoom, 4.0))
-        if self.zoom_level == 1.0:
+        self.zoom_level = max(0.25, min(zoom, 4.0))
+        if self.zoom_level <= 1.0:
             self.pan_offset = QPointF(0, 0)
         self._sync_transform()
 
@@ -88,9 +88,9 @@ class ImageCanvas(QWidget):
         delta = event.angleDelta().y()
         zoom_factor = 1.1 if delta > 0 else 0.9
 
-        self.zoom_level = max(1.0, min(self.zoom_level * zoom_factor, 4.0))
+        self.zoom_level = max(0.25, min(self.zoom_level * zoom_factor, 4.0))
 
-        if self.zoom_level == 1.0:
+        if self.zoom_level <= 1.0:
             self.pan_offset = QPointF(0, 0)
 
         self._sync_transform()
