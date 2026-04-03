@@ -46,6 +46,9 @@ class AppState:
     # Hardware Acceleration
     gpu_enabled: bool = True
 
+    # High Quality / Full Resoluiton Preview Toggle
+    hq_preview: bool = False
+
     # History tracking
     undo_index: int = 0
     max_history_index: int = 0

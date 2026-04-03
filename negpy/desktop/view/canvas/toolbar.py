@@ -105,6 +105,11 @@ class ActionToolbar(QWidget):
         self.zoom_label = QLabel("100%")
         self.zoom_label.setFixedWidth(35)
         self.zoom_label.setStyleSheet(f"color: {THEME.text_secondary}; font-size: 11px;")
+        
+        self.btn_hq = QToolButton()
+        self.btn_hq.setText("HQ")
+        self.btn_hq.setCheckable(True)
+        self.btn_hq.setToolTip("Toggle High Quality Preview")
 
         # 6. Session
         self.btn_save = QPushButton(" Save")
@@ -130,6 +135,7 @@ class ActionToolbar(QWidget):
             self.btn_save,
             self.btn_export,
             self.btn_unload,
+            self.btn_hq,
         ]
 
         for btn in all_buttons:
@@ -141,6 +147,7 @@ class ActionToolbar(QWidget):
         row1_layout.addWidget(self.btn_next)
         row1_layout.addWidget(self.zoom_slider)
         row1_layout.addWidget(self.zoom_label)
+        row1_layout.addWidget(self.btn_hq)
         row1_layout.addWidget(self.btn_rot_l)
         row1_layout.addWidget(self.btn_rot_r)
         row1_layout.addWidget(self.btn_flip_h)
@@ -181,6 +188,7 @@ class ActionToolbar(QWidget):
 
         # Zoom
         self.zoom_slider.valueChanged.connect(lambda v: self.controller.zoom_requested.emit(float(v / 100.0)))
+        self.btn_hq.clicked.connect(self.controller.toggle_hq_preview)
         self.controller.zoom_changed.connect(self._on_zoom_changed)
 
         # State sync for button enabled/disabled
@@ -223,3 +231,4 @@ class ActionToolbar(QWidget):
 
         self.btn_undo.setEnabled(state.undo_index > 0)
         self.btn_redo.setEnabled(state.undo_index < state.max_history_index)
+        self.btn_hq.setChecked(state.hq_preview)

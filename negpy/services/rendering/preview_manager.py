@@ -20,6 +20,7 @@ class PreviewManager:
         file_path: str,
         color_space: str | None = None,
         use_camera_wb: bool = False,
+        full_resolution: bool = False,
     ) -> Tuple[ImageBuffer, Dimensions, dict]:
         """
         Loads linear RGB, downsamples for display.
@@ -53,7 +54,7 @@ class PreviewManager:
             h_orig, w_orig = full_linear.shape[:2]
 
             max_res = APP_CONFIG.preview_render_size
-            if max(h_orig, w_orig) > max_res:
+            if max(h_orig, w_orig) > max_res and not full_resolution:
                 scale = max_res / max(h_orig, w_orig)
                 target_w = int(w_orig * scale)
                 target_h = int(h_orig * scale)
